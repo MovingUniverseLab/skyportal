@@ -12,7 +12,7 @@ import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
 import emoji from "emoji-dictionary";
 
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "./user/UserAvatar";
 import DeleteComment from "./DeleteComment";
 
 dayjs.extend(relativeTime);
@@ -71,6 +71,7 @@ const CompactCommentList = ({
           lastName={author.last_name}
           username={author.username}
           gravatarUrl={author.gravatar_url}
+          isBot={author?.is_bot || false}
         />
       </div>
       <div

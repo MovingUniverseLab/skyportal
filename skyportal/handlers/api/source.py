@@ -184,9 +184,9 @@ def check_if_obj_has_photometry(obj_id, user, session):
 
 async def get_source(
     obj_id,
-    tns_name,
     user_id,
     session,
+    tns_name=None,
     include_thumbnails=False,
     include_comments=False,
     include_analyses=False,
@@ -2046,7 +2046,7 @@ def post_source(data, user_id, session, refresh_source=True):
     for group in groups:
         # see if there is a tnsrobot_group set up for autosubmission
         # and if the user has autosubmission set up
-        tnsrobot_group_with_autoreporter = session.scalars(
+        stmt = (
             TNSRobotGroup.select(saver_per_group_id[group.id])
             .join(
                 TNSRobotGroupAutoreporter,
@@ -2062,7 +2062,10 @@ def post_source(data, user_id, session, refresh_source=True):
                     )
                 ),
             )
-        ).first()
+        )
+        if saver_per_group_id[group.id].is_bot:
+            stmt = stmt.where(TNSRobotGroup.auto_report_allow_bots.is_(True))
+        tnsrobot_group_with_autoreporter = session.scalars(stmt).first()
 
         if tnsrobot_group_with_autoreporter is not None:
             # add a request to submit to TNS for only the first group we save to
@@ -3084,9 +3087,9 @@ class SourceHandler(BaseHandler):
                 try:
                     source_info = await get_source(
                         obj_id,
-                        tns_name,
                         self.associated_user_object.id,
                         session,
+                        tns_name=tns_name,
                         include_thumbnails=include_thumbnails,
                         include_comments=include_comments,
                         include_analyses=include_analyses,

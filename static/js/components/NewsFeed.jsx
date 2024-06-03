@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Paper, Avatar, Tooltip } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Paper from "@mui/material/Paper";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
 import makeStyles from "@mui/styles/makeStyles";
@@ -15,7 +17,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import emoji from "emoji-dictionary";
 
 import WidgetPrefsDialog from "./WidgetPrefsDialog";
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "./user/UserAvatar";
 import * as profileActions from "../ducks/profile";
 
 dayjs.extend(relativeTime);
@@ -109,6 +111,7 @@ const NewsFeedItem = ({ item }) => {
           lastName={item.author_info.last_name}
           username={item.author_info.username}
           gravatarUrl={item.author_info.gravatar_url}
+          isBot={item.author_info?.is_bot || false}
         />
       );
       entryTitle = null;
@@ -253,6 +256,7 @@ NewsFeedItem.propTypes = {
       first_name: PropTypes.string,
       last_name: PropTypes.string,
       gravatar_url: PropTypes.string.isRequired,
+      is_bot: PropTypes.bool,
     }),
   }).isRequired,
 };
