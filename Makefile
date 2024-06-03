@@ -29,7 +29,7 @@ docker-images: docker-local
 
 docker-local: ## Build docker images locally
 	cd baselayer && git submodule update --init --remote
-	docker build -t skyportal/web .
+	docker build -t skyportal/web --no-cache .
 
 doc_reqs:
 	pip install -q -r requirements.docs.txt
@@ -61,7 +61,8 @@ load_demo_data: | dependencies prepare_seed_data
 load_seed_data: ## Seed database with common telescopes, instruments, and a taxonomy
 load_seed_data: FLAGS := $(if $(FLAGS),$(FLAGS),--config=config.yaml)
 load_seed_data: | dependencies prepare_seed_data
-	@PYTHONPATH=. python tools/data_loader.py data/db_seed.yaml $(FLAGS)
+#	@PYTHONPATH=. python tools/data_loader.py data/db_seed.yaml $(FLAGS)
+	@PYTHONPATH=. python tools/data_loader.py data/db_mulab.yaml $(FLAGS)
 
 db_migrate: ## Migrate database to latest schema
 db_migrate: FLAGS := $(if $(FLAGS),$(FLAGS),--config=config.yaml)

@@ -39,6 +39,7 @@ static/index.html
 # Auto-generated data files
 data/taxonomy_sitewide.yaml
 data/taxonomy_demo.yaml
+data/dbdata/
 .idea
 doc/images/erd.png
 
