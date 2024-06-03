@@ -26,6 +26,6 @@ An Astronomical Data Platform
   </a>
 </p>
 
-## Installation & Usage
+## Installation & Usage TEST
 
 Please refer to the <a href="https://skyportal.io/docs">project documentation</a>.
