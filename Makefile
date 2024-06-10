@@ -62,7 +62,8 @@ load_seed_data: ## Seed database with common telescopes, instruments, and a taxo
 load_seed_data: FLAGS := $(if $(FLAGS),$(FLAGS),--config=config.yaml)
 load_seed_data: | dependencies prepare_seed_data
 #	@PYTHONPATH=. python tools/data_loader.py data/db_seed.yaml $(FLAGS)
-	@PYTHONPATH=. python tools/data_loader.py data/db_mulab.yaml $(FLAGS)
+#	@PYTHONPATH=. python tools/data_loader.py data/db_mulab.yaml $(FLAGS)
+	@PYTHONPATH=. python tools/data_loader.py /MNTLEAF/db_mulab_init.yaml $(FLAGS)
 
 db_migrate: ## Migrate database to latest schema
 db_migrate: FLAGS := $(if $(FLAGS),$(FLAGS),--config=config.yaml)
