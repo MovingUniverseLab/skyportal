@@ -6,4 +6,4 @@ database:
     password: password
 
 server:
-    url: db
+    url: http://localhost:5000
