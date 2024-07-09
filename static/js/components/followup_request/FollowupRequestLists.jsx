@@ -17,11 +17,11 @@ import makeStyles from "@mui/styles/makeStyles";
 import MUIDataTable from "mui-datatables";
 import { showNotification } from "baselayer/components/Notifications";
 import Button from "../Button";
-import WatcherButton from "../WatcherButton";
+import WatcherButton from "./WatcherButton";
 
 import * as Actions from "../../ducks/source";
 
-import EditFollowupRequestDialog from "../EditFollowupRequestDialog";
+import EditFollowupRequestDialog from "./EditFollowupRequestDialog";
 
 const useStyles = makeStyles(() => ({
   actionButtons: {
@@ -305,7 +305,9 @@ const FollowupRequestLists = ({
         const isDone =
           followupRequest.status === "Photometry committed to database";
 
-        const isSubmitted = followupRequest.status === "submitted";
+        const isSubmitted = ["submitted", "pending"].includes(
+          followupRequest.status,
+        );
 
         const isFailed = followupRequest.status === "failed to submit";
 
@@ -697,13 +699,12 @@ FollowupRequestLists.propTypes = {
     }),
   ).isRequired,
   instrumentFormParams: PropTypes.shape({
-    // eslint-disable-next-line react/forbid-prop-types
     formSchema: PropTypes.objectOf(PropTypes.any),
-    // eslint-disable-next-line react/forbid-prop-types
+
     uiSchema: PropTypes.objectOf(PropTypes.any),
-    // eslint-disable-next-line react/forbid-prop-types
+
     methodsImplemented: PropTypes.objectOf(PropTypes.any),
-    // eslint-disable-next-line react/forbid-prop-types
+
     aliasLookup: PropTypes.objectOf(PropTypes.any),
   }).isRequired,
   handleTableChange: PropTypes.func,
