@@ -23,18 +23,27 @@ from astropy.time import Time
 from astropy_healpix import HEALPix, nside_to_level, pixel_resolution_to_nside
 from mocpy import MOC
 
+SKYMAP_MIN = 1e-300
+
 
 def get_trigger(root):
     """Get the trigger ID from a GCN notice."""
 
-    property_name = "TrigID"
-    path = f".//Param[@name='{property_name}']"
-    elem = root.find(path)
+    elem = None
+    property_names = ["TrigID", "Burst_Id"]
+    for property_name in property_names:
+        path = f".//Param[@name='{property_name}']"
+        elem_path = root.find(path)
+        if elem_path is not None:
+            elem = elem_path
+            break
+
     if elem is None:
         return None
+
     value = elem.attrib.get('value', None)
     if value is not None:
-        value = int(value)
+        value = str(value)
 
     return value
 
@@ -179,6 +188,14 @@ def get_tags(root):
         if len(instruments) > 1:
             yield "MultiInstrument"
 
+    # Get instrument if present
+    try:
+        value = root.find(".//Param[@name='Instrument']").attrib['value']
+    except AttributeError:
+        pass
+    else:
+        yield value
+
     # Get pipeline if present.
     try:
         value = root.find(".//Param[@name='Pipeline']").attrib['value']
@@ -298,9 +315,17 @@ def get_skymap_cone(root):
     ra, dec, error = None, None, None
 
     if isinstance(root, dict):
-        ra = root.get("ra")
-        dec = root.get("dec")
-        error = root.get("ra_dec_error")
+        if "coincident_events" in root:
+            for coincident_event in root["coincident_events"]:
+                if "localization" in coincident_event:
+                    ra = coincident_event["localization"].get("ra")
+                    dec = coincident_event["localization"].get("dec")
+                    error = coincident_event["localization"].get("ra_dec_error")
+                    break
+        else:
+            ra = root.get("ra")
+            dec = root.get("dec")
+            error = root.get("ra_dec_error")
     else:
         mission = urlparse(root.attrib['ivorn']).path.lstrip('/')
         # Try error cone
@@ -415,6 +440,12 @@ def get_properties(root):
         # Neutrinos
         "signalness",
         "energy",
+        # SVOM
+        "SNR",
+        "Mean_Flux",
+        "Flux_Error",
+        "Lower_Energy_Bound",
+        "Upper_Energy_Bound",
     ]
     property_dict = {}
     for property_name in property_names:
@@ -424,7 +455,7 @@ def get_properties(root):
             continue
         value = elem.attrib.get('value', None)
         if value is not None:
-            value = float(value)
+            value = float(value.strip('>='))
             property_dict[property_name] = value
 
     tags_list = []
@@ -574,6 +605,10 @@ def from_bytes(arr):
         f.flush()
 
         skymap = ligo.skymap.io.read_sky_map(f.name, moc=True)
+
+        idx = np.where(skymap['PROBDENSITY'] < SKYMAP_MIN)[0]
+        skymap['PROBDENSITY'][idx] = 0
+
         properties_dict, tags_list = properties_tags_from_meta(skymap.meta)
 
         nside = 128
@@ -658,8 +693,7 @@ def from_url(url):
     skymap = ligo.skymap.io.read_sky_map(url, moc=True)
     properties_dict, tags_list = properties_tags_from_meta(skymap.meta)
 
-    minval = 1e-300
-    idx = np.where(skymap['PROBDENSITY'] < minval)[0]
+    idx = np.where(skymap['PROBDENSITY'] < SKYMAP_MIN)[0]
     skymap['PROBDENSITY'][idx] = 0
 
     nside = 128
